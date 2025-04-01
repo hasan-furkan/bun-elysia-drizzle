@@ -1,6 +1,7 @@
-import { eq, ilike, and, count } from 'drizzle-orm';
+import { eq, ilike, and, SQL } from 'drizzle-orm'; // Import SQL type
 import { usersTable } from '../db/schema';
-import { db } from '../db/db';
+// Remove db import if not used directly for select/count anymore
+// import { db } from '../db/db'; // No longer needed here
 
 // Define the filter interface specifically for users
 export interface UserFilterParams {
@@ -10,34 +11,28 @@ export interface UserFilterParams {
   // Add other filter fields as needed
 }
 
-export const userFilters = (filters: UserFilterParams, isCountQuery: boolean = false) => {
+// Renamed function, removed isCountQuery, returns SQL | undefined
+export const getUserFilterConditions = (filters: UserFilterParams): SQL | undefined => {
   // Generate the conditions for filtering
-  const conditions = [];
-  
+  const conditions: SQL[] = []; // Explicitly type as SQL[]
+
   if (filters.name) {
     conditions.push(ilike(usersTable.name, `%${filters.name}%`));
   }
-  
+
   if (filters.email) {
     conditions.push(ilike(usersTable.email, `%${filters.email}%`));
   }
-  
+
   if (filters.age !== undefined) {
     conditions.push(eq(usersTable.age, typeof filters.age === 'string' ? parseInt(filters.age, 10) : filters.age));
   }
-  
-  // Create the query based on whether it's a count query or a select query
-  let query;
-  if (isCountQuery) {
-    query = db.select({ value: count() }).from(usersTable);
-  } else {
-    query = db.select().from(usersTable);
-  }
-  
-  // Apply conditions if any exist
+
+  // Return the combined conditions using 'and', or undefined if no conditions
   if (conditions.length > 0) {
-    return query.where(and(...conditions));
+    // Use and(...) which accepts an array of conditions
+    return and(...conditions);
   }
-  
-  return query;
+
+  return undefined; // Return undefined if no filters are applied
 };
