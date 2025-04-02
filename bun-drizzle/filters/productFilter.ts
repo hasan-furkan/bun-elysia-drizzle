@@ -19,11 +19,13 @@ export const getProductFilterConditions = (filters: ProductFilterParams): SQL | 
   const conditions: SQL[] = []; // Explicitly type as SQL[]
 
   if (filters.name) {
-    conditions.push(ilike(productsTable.name, `%${filters.name}%`));
+    // Use prefix search for potential index usage
+    conditions.push(ilike(productsTable.name, `${filters.name}%`));
   }
 
   if (filters.category) {
-    conditions.push(ilike(productsTable.category, `%${filters.category}%`));
+    // Use prefix search for potential index usage
+    conditions.push(ilike(productsTable.category, `${filters.category}%`));
   }
 
   if (filters.minPrice !== undefined) {

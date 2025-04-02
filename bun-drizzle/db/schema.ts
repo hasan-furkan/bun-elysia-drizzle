@@ -1,10 +1,14 @@
-import { integer, pgTable, varchar, uuid, decimal } from "drizzle-orm/pg-core";
+import { integer, pgTable, varchar, uuid, decimal, index } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: uuid().primaryKey().defaultRandom(),
   name: varchar({ length: 255 }).notNull(),
   age: integer().notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
+}, (table) => { // <-- Üçüncü argüman olarak fonksiyon ekleniyor
+  return {
+    ageIndex: index("age_idx").on(table.age), // <-- Index tanımı
+  };
 });
 
 export const productsTable = pgTable("products", {

@@ -101,48 +101,56 @@ const updateUser = async () => {
 }
 
 
-// const generateRandomUserData = () => {
-//   return {
-//     name: `User${crypto.randomUUID()}`,
-//     age: Math.floor(Math.random() * 60) + 18,
-//     email: `user${crypto.randomUUID()}@example.com`
-//   };
-// };
+const generateRandomUserData = () => {
+    const names = ["Alice", "Bob", "Charlie", "David", "Emma", "Frank", "Grace", "Hannah"];
+    const domains = ["gmail.com", "yahoo.com", "outlook.com", "example.com"];
 
-// const insertRandomUsers = async (count: number) => {
-//   const users = [];
+    const name = names[Math.floor(Math.random() * names.length)];
+    const uniquePart = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+    const email = `${name.toLowerCase()}.${uniquePart}@${domains[Math.floor(Math.random() * domains.length)]}`;
+
+    return {
+      name: `${name} ${uniquePart}`,
+      age: Math.floor(Math.random() * 60) + 18,
+      email: email
+    };
+};
   
-//   for (let i = 0; i < count; i++) {
-//     users.push(generateRandomUserData());
+
+const insertRandomUsers = async (count: number) => {
+  const users = [];
+  
+  for (let i = 0; i < count; i++) {
+    users.push(generateRandomUserData());
     
-//     if (users.length >= 10000) {
-//       await db.insert(usersTable).values(users);
-//       users.length = 0;
-//     }
-//   }
+    if (users.length >= 10000) {
+      await db.insert(usersTable).values(users);
+      users.length = 0;
+    }
+  }
 
-//   if (users.length > 0) {
-//     await db.insert(usersTable).values(users);
-//   }
-//   console.log(`Successfully inserted ${count} users.`);
-// };
+  if (users.length > 0) {
+    await db.insert(usersTable).values(users);
+  }
+  console.log(`Successfully inserted ${count} users.`);
+};
 
-// const addTestUsers = async () => {
-//   console.time('InsertTime');
-//   await insertRandomUsers(100000); // 100.000 kayıt ekle
-//   console.timeEnd('InsertTime');
-// };
+const addTestUsers = async () => {
+  console.time('InsertTime');
+  await insertRandomUsers(1000000); // 100.000 kayıt ekle
+  console.timeEnd('InsertTime');
+};
 
 
 const getAllUsers = async () => {
     // Start the timer
     console.time('paginateAndSortExecutionTime');
-  
+
     try {
       const result = await paginateAndSort({
         page: 1,
         pageSize: 10,
-        filters: { name: 'asdf' },
+        filters: { age: 20, minAge: 18, maxAge: 30 },
         sortBy: 'id',
         sortOrder: 'asc',
         tableName: 'users',
